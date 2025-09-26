@@ -86,16 +86,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myshop.wsgi.application'
 
 # --------------------------
+# --------------------------
 # Base de données (Djongo/MongoDB) - Connexion Atlas RESTAURÉE
-# --------------------------
-# NOTE: Cette connexion doit maintenant utiliser l'IP statique enregistrée dans le fichier hosts.
-# --------------------------
-# Base de données (SQLite LOCAL) - Pour contourner le blocage du port mobile
 # --------------------------
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': 'store',
+        'CLIENT': {
+            'host': 'mongodb://mezianimohamedabdelsamed_db_user:samedsamed13@cluster0.7k6tbxv.mongodb.net/store?retryWrites=true&w=majority',
+        }
     }
 }
 # --------------------------
