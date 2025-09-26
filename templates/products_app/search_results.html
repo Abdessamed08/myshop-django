@@ -1,0 +1,57 @@
+{% extends "accounts/base.html" %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Titre de recherche -->
+    <div class="row mb-4">
+        <div class="col text-center">
+            <h2 class="mb-2">Résultats pour : "{{ query }}"</h2>
+            <p class="text-muted">
+                {% if products %}
+                    {{ products|length }} produit(s) trouvé(s)
+                {% else %}
+                    Aucun produit trouvé
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Produits -->
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden">
+
+                <!-- Image principale -->
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="object-fit:cover; height:220px;">
+
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="text-success fw-bold">{{ product.price }} DA</p>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'products_app:add_to_cart' product.id %}" class="btn btn-success btn-modern w-50">
+                            <i class="bi bi-cart-plus-fill me-1"></i> Panier
+                        </a>
+                        <a href="{% url 'products_app:buy_now' product.id %}" class="btn btn-primary btn-modern w-50 text-white">
+                            <i class="bi bi-bag-fill me-1"></i> Acheter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">Aucun produit disponible pour le moment.</p>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- Optionnel : ajouter un petit style responsive supplémentaire -->
+<style>
+.card:hover img {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+</style>
+{% endblock %}

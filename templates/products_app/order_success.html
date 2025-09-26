@@ -1,0 +1,348 @@
+{% extends "accounts/base.html" %}
+{% load math_filters %}
+
+{% block extra_css %}
+<style>
+/* ===========================
+   🎨 Design system
+   =========================== */
+:root {
+  --primary: #0d6efd;
+  --primary-dark: #084298;
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #ffc107;
+  --info: #17a2b8;
+
+  --bg: #f5f7fa;
+  --card-bg: #ffffff;
+  --text: #212529;
+  --muted: #6c757d;
+  --border: #dee2e6;
+
+  --radius: 16px;
+  --shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+/* ===========================
+   🏗️ Global
+   =========================== */
+body {
+  background-color: var(--bg);
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.container-success {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+/* ===========================
+   🎉 Header de succès
+   =========================== */
+.success-header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
+}
+
+.success-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.success-header p {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* ===========================
+   📦 Étapes de commande
+   =========================== */
+.steps {
+  display: flex;
+  justify-content: space-between;
+  margin: 2rem 0;
+  position: relative;
+}
+
+.steps::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  z-index: 1;
+}
+
+.step {
+  position: relative;
+  z-index: 2;
+  background: var(--card-bg);
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius);
+  text-align: center;
+  flex: 1;
+  margin: 0 0.5rem;
+  box-shadow: var(--shadow);
+}
+
+.step.active {
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+}
+
+/* ===========================
+   📑 Cartes
+   =========================== */
+.card-custom {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  transition: transform .2s ease;
+}
+
+.card-custom:hover {
+  transform: translateY(-3px);
+}
+
+.card-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: 1rem;
+}
+
+/* ===========================
+   👤 Infos client
+   =========================== */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.info-item {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 1rem;
+  border: 1px solid var(--border);
+}
+
+.info-item strong {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  color: var(--text);
+}
+
+/* ===========================
+   🛒 Produits
+   =========================== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow-x: auto;
+}
+
+.table th, .table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.table th {
+  background: var(--bg);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.table td img {
+  max-width: 60px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.table tfoot th {
+  font-size: 1.2rem;
+  text-align: right;
+  color: var(--primary-dark);
+}
+
+/* ===========================
+   💳 Paiement
+   =========================== */
+.payment-info {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.payment-box {
+  flex: 1;
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.payment-box strong {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--primary-dark);
+}
+
+/* ===========================
+   🔙 Boutons
+   =========================== */
+.btn-home {
+  display: inline-block;
+  padding: 0.9rem 1.8rem;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background .2s ease, transform .2s ease;
+}
+
+.btn-home:hover {
+  background: var(--primary-dark);
+  transform: scale(1.05);
+}
+
+/* ===========================
+   📱 Responsive
+   =========================== */
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  .steps {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .step {
+    margin: 0;
+  }
+  .payment-info {
+    flex-direction: column;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-success">
+
+  <!-- 🎉 Header -->
+  <div class="success-header">
+    <h1>Commande confirmée !</h1>
+    <p>Merci {{ order.full_name }}, votre commande a bien été enregistrée.</p>
+  </div>
+
+  <!-- 📦 Étapes -->
+  <div class="steps">
+    <div class="step">Panier</div>
+    <div class="step">Informations</div>
+    <div class="step active">Confirmation</div>
+  </div>
+
+  <!-- 👤 Infos client -->
+  <div class="card-custom">
+    <h3 class="card-title">Informations du client</h3>
+    <div class="info-grid">
+      <div class="info-item">
+        <strong>Nom complet</strong>
+        {{ order.full_name }}
+      </div>
+      <div class="info-item">
+        <strong>Email</strong>
+        {{ order.email }}
+      </div>
+      <div class="info-item">
+        <strong>Téléphone</strong>
+        {{ order.phone }}
+      </div>
+      <div class="info-item">
+        <strong>Adresse</strong>
+        {{ order.address_details }}, {{ order.commune.name }},
+        {{ order.daira.name }}, {{ order.wilaya.name }}
+      </div>
+    </div>
+  </div>
+
+<!-- 🛒 Produits -->
+<div class="card-custom">
+  <h3 class="card-title">Produits commandés</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Produit</th>
+        <th>Image</th>
+        <th>Prix Unitaire</th>
+        <th>Quantité</th>
+        <th>Sous-total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in order.items.all %}
+      <tr>
+        <td>{{ item.product.name }}</td>
+        <td><img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"></td>
+        <td>{{ item.price|floatformat:2 }} DA</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.subtotal|floatformat:2 }} DA</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="4" style="text-align:right;">Total :</th>
+        <th>{{ order.get_total_price|floatformat:2 }} DA</th>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+  <!-- 💳 Paiement & Livraison -->
+  <div class="card-custom">
+    <h3 class="card-title">Informations de paiement & livraison</h3>
+    <div class="payment-info">
+      <div class="payment-box">
+        <strong>Méthode de paiement</strong>
+        Paiement à la livraison
+      </div>
+      <div class="payment-box">
+        <strong>Date de commande</strong>
+        {{ order.created_at|date:"d M Y, H:i" }}
+      </div>
+      <div class="payment-box">
+        <strong>Status</strong>
+        <span style="color: var(--success); font-weight:600;">Confirmée</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔙 Bouton retour -->
+  <div class="text-center" style="margin-top:2rem;">
+    <a href="/" class="btn-home">Retour à l'accueil</a>
+  </div>
+
+</div>
+{% endblock %}

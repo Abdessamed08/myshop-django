@@ -1,0 +1,9 @@
+{% extends "accounts/base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-success">
+        ✅ Votre mot de passe a été changé avec succès !
+    </div>
+    <a href="{% url 'accounts:settings' %}" class="btn btn-primary">Retour aux paramètres</a>
+</div>
+{% endblock %}

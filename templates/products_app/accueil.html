@@ -1,0 +1,44 @@
+<div id="products-section" class="products-section container py-5">
+    <div class="row mb-5">
+        <div class="col text-center">
+            <h2 class="mb-3">NOS PRODUITS</h2>
+            <p class="text-muted">Découvrez nos articles de football disponibles dès maintenant</p>
+        </div>
+    </div>
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+            <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden">
+                <div class="product-slider position-relative" id="slider-{{ product.id }}">
+                    {% for img in product.images.all %}
+                    <img src="{{ img.image.url }}" class="slider-img {% if forloop.first %}active{% endif %}" alt="{{ product.name }}">
+                    {% endfor %}
+                    <button class="slider-arrow left" onclick="changeSlide({{ product.id }}, -1)">&#10094;</button>
+                    <button class="slider-arrow right" onclick="changeSlide({{ product.id }}, 1)">&#10095;</button>
+                </div>
+
+                <div class="d-flex justify-content-center flex-wrap mt-2 gap-2">
+                    {% for img in product.images.all %}
+                    <img src="{{ img.image.url }}" alt="" class="thumb-img {% if forloop.first %}active{% endif %}" onclick="showImage({{ product.id }}, {{ forloop.counter0 }})">
+                    {% endfor %}
+                </div>
+
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="text-success fw-bold">{{ product.price }} DA</p>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'products_app:add_to_cart' product.id %}" class="btn btn-success btn-modern w-50">
+                            <i class="bi bi-cart-plus-fill me-1"></i> Panier
+                        </a>
+                        <a href="{% url 'products_app:buy_now' product.id %}" class="btn btn-primary btn-modern w-50 text-white">
+                            <i class="bi bi-bag-fill me-1"></i> Acheter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">Aucun produit disponible pour le moment.</p>
+        {% endfor %}
+    </div>
+</div>

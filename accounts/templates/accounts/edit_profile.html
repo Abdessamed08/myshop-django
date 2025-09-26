@@ -1,0 +1,374 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid soft-ui-background py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card soft-ui-card rounded-5 border-0 shadow-lg">
+                <div class="card-header bg-white text-center py-4 border-0 rounded-top-5">
+                    <h2 class="mb-0 fw-bold display-6 text-dark">Modifier le Profil</h2>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" enctype="multipart/form-data" class="profile-form">
+                        {% csrf_token %}
+                        <div class="row g-4 align-items-center">
+                            <div class="col-12 col-md-4 text-center mb-4">
+                                <div class="profile-photo-wrapper mx-auto position-relative">
+                                    <img id="profilePreview" 
+                                         src="{% if user.profile.photo %}{{ user.profile.photo.url }}{% else %}{% static 'images/avatar_default.png' %}{% endif %}" 
+                                         alt="Photo de profil" 
+                                         class="profile-photo rounded-circle soft-shadow-inset">
+
+                                    {% if user.profile.photo %}
+                                    <button type="button" class="delete-photo-btn position-absolute rounded-circle d-flex align-items-center justify-content-center shadow-lg" onclick="deleteProfilePhoto()">
+                                        <i class="fas fa-trash-alt text-white"></i>
+                                    </button>
+                                    {% endif %}
+                                    
+                                    <label for="{{ profile_form.photo.id_for_label }}" class="change-photo-btn position-absolute rounded-circle d-flex align-items-center justify-content-center shadow-lg">
+                                        <i class="fas fa-camera text-white"></i>
+                                    </label>
+                                </div>
+                                <div class="d-none">
+                                    {{ profile_form.photo }}
+                                    <input type="checkbox" name="{{ profile_form.photo.name }}-clear" id="id_{{ profile_form.photo.name }}-clear" class="d-none">
+                                </div>
+                                <small class="text-muted d-block mt-3">Cliquez sur l'icône pour changer la photo</small>
+                            </div>
+
+                            <div class="col-12 col-md-8">
+                                <h5 class="mb-3 fw-bold text-muted">Informations Personnelles</h5>
+                                <div class="form-floating mb-3">
+                                    {{ user_form.username }}
+                                    <label for="{{ user_form.username.id_for_label }}">Nom d'utilisateur</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    {{ user_form.email }}
+                                    <label for="{{ user_form.email.id_for_label }}">Email</label>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-floating mb-3 mb-md-0">
+                                            {{ user_form.first_name }}
+                                            <label for="{{ user_form.first_name.id_for_label }}">Prénom</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            {{ user_form.last_name }}
+                                            <label for="{{ user_form.last_name.id_for_label }}">Nom</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-floating mt-4">
+                                    {{ profile_form.phone }}
+                                    <label for="{{ profile_form.phone.id_for_label }}">Téléphone</label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 py-3 mt-4 rounded-pill soft-ui-button">
+                                    <i class="fas fa-save me-2"></i> Enregistrer les modifications
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const defaultPhotoUrl = "{% static 'images/avatar_default.png' %}";
+    
+    const previewImage = (event) => {
+        const reader = new FileReader();
+        reader.onload = function() {
+            document.getElementById('profilePreview').src = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    };
+
+    const deleteProfilePhoto = () => {
+        document.getElementById('profilePreview').src = defaultPhotoUrl;
+        const deleteBtn = document.querySelector('.delete-photo-btn');
+        if (deleteBtn) {
+            deleteBtn.style.display = 'none';
+        }
+
+        const photoClearInput = document.getElementById('id_{{ profile_form.photo.name }}-clear');
+        if (photoClearInput) {
+            photoClearInput.checked = true;
+        }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const fileInput = document.getElementById('{{ profile_form.photo.id_for_label }}');
+        if (fileInput) {
+            fileInput.addEventListener('change', previewImage);
+        }
+    });
+</script>
+
+<style>
+    :root {
+        --bg-color: #f0f2f5;
+        --card-color: #ffffff;
+        --primary-color: #007bff;
+        --primary-hover: #0056b3;
+        --text-color: #212529;
+        --label-color: #6c757d;
+        --shadow-light: rgba(0, 0, 0, 0.08);
+        --shadow-dark: rgba(0, 0, 0, 0.05);
+    }
+    body {
+        background-color: var(--bg-color);
+        font-family: 'Inter', sans-serif;
+        color: var(--text-color);
+        min-height: 100vh;
+    }
+    .soft-ui-background {background-color: var(--bg-color);}
+    .soft-ui-card {
+        background-color: var(--card-color);
+        transition: transform 0.3s ease-in-out;
+        box-shadow: 0 10px 30px var(--shadow-light);
+    }
+    .soft-ui-card:hover {transform: translateY(-5px);}
+    .card-header {border-bottom: 1px solid #e9ecef !important;}
+    .display-6 {font-size: calc(1.5rem + 1vw);}
+    .form-floating > input, .form-floating > textarea {
+        background-color: var(--bg-color);
+        border: 1px solid #ced4da;
+        border-radius: 0.75rem;
+        color: var(--text-color);
+        transition: all 0.3s ease-in-out;
+        padding: 1.25rem 1rem;
+        height: auto;
+        min-height: 3.5rem;
+    }
+    .form-floating > input:focus, .form-floating > textarea:focus {
+        background-color: var(--card-color);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, .1);
+    }
+    .form-floating > label {
+        color: var(--label-color);
+        padding-left: 1rem;
+        transition: all 0.3s;
+    }
+    .profile-photo-wrapper {
+        width: 150px;
+        height: 150px;
+        transition: transform 0.3s ease-in-out;
+    }
+    .profile-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border: 4px solid var(--primary-color);
+        box-shadow: 0 0 0 5px var(--bg-color), 0 0 0 6px var(--primary-color);
+    }
+    .change-photo-btn {
+        bottom: 0;
+        right: 0;
+        width: 40px;
+        height: 40px;
+        background-color: var(--primary-color);
+        border: 3px solid var(--card-color);
+        cursor: pointer;
+        transition: transform 0.3s ease-in-out, background-color 0.3s;
+        z-index: 10;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .change-photo-btn:hover {background-color: var(--primary-hover);transform: scale(1.1);}
+    .change-photo-btn i {font-size: 1.1rem;color: var(--card-color);}
+    .delete-photo-btn {
+        bottom: 0;
+        left: 0;
+        width: 40px;
+        height: 40px;
+        background-color: #dc3545;
+        border: 3px solid var(--card-color);
+        cursor: pointer;
+        transition: transform 0.3s ease-in-out, background-color 0.3s;
+        z-index: 10;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .delete-photo-btn:hover {background-color: #c82333;transform: scale(1.1);}
+    .delete-photo-btn i {font-size: 1.1rem;color: var(--card-color);}
+    .soft-ui-button {
+        font-weight: 600;
+        font-size: 1.1rem;
+        background-color: var(--primary-color);
+        border: none;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+    }
+    .soft-ui-button:hover {
+        transform: translateY(-2px);
+        background-color: var(--primary-hover);
+        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg-color: #121212;
+            --card-color: #1e1e1e;
+            --primary-color: #8c7ae6;
+            --primary-hover: #6a59b2;
+            --text-color: #e0e0e0;
+            --label-color: #a0a0a0;
+        }
+        .soft-ui-card {box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);}
+        .card-header {border-bottom: 1px solid #333 !important;}
+        .form-floating > input, .form-floating > textarea {
+            background-color: #2c2c2c;
+            border-color: #444;
+            color: var(--text-color);
+        }
+        .form-floating > input:focus, .form-floating > textarea:focus {
+            background-color: #2c2c2c;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(140, 122, 230, .25);
+        }
+        .soft-ui-button {box-shadow: 0 4px 15px rgba(140, 122, 230, 0.2);}
+    }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Changer mon mot de passe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0f4f8, #e4e9f0);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #495057;
+        }
+        .form-card {
+            background: #ffffff;
+            border: none;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.8s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #2c3e50;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+        .card-subtitle {
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
+        .form-control {
+            border-radius: 0.75rem;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+            outline: none;
+        }
+        .btn-custom {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            border: none;
+            color: white;
+            padding: 0.85rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .btn-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.6);
+            color: white;
+        }
+        .btn-custom:active {
+            transform: translateY(0);
+        }
+        .invalid-feedback {
+            font-size: 0.875rem;
+            color: #e74c3c;
+        }
+        .form-text {
+            font-size: 0.875rem;
+        }
+        .alert-success-custom {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+            border-radius: 1rem;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100 p-3">
+        <div class="form-card p-4 p-md-5 w-100" style="max-width: 500px;">
+            <div class="card-body">
+                {% if messages %}
+                    <div class="alert alert-success-custom text-center" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>Votre mot de passe a été changé avec succès !
+                    </div>
+                {% endif %}
+
+                <h2 class="card-title text-center">
+                    <i class="fas fa-key me-2"></i>Changer mon mot de passe
+                </h2>
+                <p class="card-subtitle text-center">Veuillez saisir votre ancien et votre nouveau mot de passe.</p>
+                
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-4">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-bold">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text text-muted">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in field.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-custom btn-lg">
+                            Mettre à jour le mot de passe
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,750 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paramètres - {{ user.username }}</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        /* ========================================================================= */
+        /* CSS VARIABLES & GLOBAL STYLES                             */
+        /* ========================================================================= */
+        :root {
+            --primary-gradient: linear-gradient(45deg, #6B8AFD, #5A67F1);
+            --primary-light: #8E98FF;
+            --primary-dark: #3a47d1;
+            --secondary-bg: #EAEFF6;
+            --text-color: #212529;
+            --card-bg-light: rgba(255, 255, 255, 0.7);
+            --card-bg-dark: rgba(24, 31, 51, 0.9);
+            --border-color-light: rgba(255, 255, 255, 0.3);
+            --border-color-dark: rgba(255, 255, 255, 0.08);
+            --shadow-light: rgba(31, 38, 135, 0.1);
+            --shadow-dark: rgba(0, 0, 0, 0.3);
+            --transition-smooth: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --transition-fast: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f0f2f5;
+            color: var(--text-color);
+            transition: background-color var(--transition-smooth);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 100px;
+        }
+
+        body.dark-mode {
+            background: #0D1223;
+            color: #F0F2F5;
+        }
+
+        body.dark-mode .page-title, body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4 {
+            color: #FFFFFF;
+        }
+        
+        body.dark-mode .text-muted, body.dark-mode .text-secondary {
+            color: #adb5bd !important;
+        }
+
+        /* Amélioration de la lisibilité des textes des interrupteurs et des listes */
+        body.dark-mode .form-check-label,
+        body.dark-mode .list-group-item,
+        body.dark-mode .form-label,
+        body.dark-mode p {
+            color: #F0F2F5; 
+        }
+
+        /* Amélioration de la lisibilité des menus déroulants en mode sombre */
+        body.dark-mode .form-select {
+            background-color: #12182b;
+            color: #F0F2F5;
+            border-color: #495057;
+        }
+        body.dark-mode .form-select option {
+            background-color: #1a2235;
+            color: #F0F2F5;
+        }
+        body.dark-mode .list-group-item.list-group-item-action:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Helper classes */
+        .desktop-only { display: none; }
+        .mobile-only { display: block; }
+        .flex-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, .page-title {
+            font-family: 'Rubik', sans-serif;
+            font-weight: 700;
+        }
+        .page-title {
+            font-size: 2.5rem;
+            color: #5A67F1;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        /* Glassmorphism Card */
+        .card-glass {
+            border-radius: 2rem;
+            background: var(--card-bg-light);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border-color-light);
+            box-shadow: 0 8px 40px var(--shadow-light);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        .card-glass:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 50px var(--shadow-light);
+        }
+        body.dark-mode .card-glass {
+            background: var(--card-bg-dark);
+            border: 1px solid var(--border-color-dark);
+            box-shadow: 0 8px 40px var(--shadow-dark);
+        }
+
+        /* Modern Button */
+        .btn-fancy {
+            border-radius: 2rem;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            background: var(--primary-gradient);
+            border: none;
+            color: #fff;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .btn-fancy::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #7b9cff, #5A67F1);
+            transform: scale(0);
+            border-radius: 50%;
+            transition: transform 0.4s ease-out;
+            z-index: -1;
+        }
+        .btn-fancy:hover::before {
+            transform: scale(2);
+        }
+        .btn-fancy:active {
+            transform: translateY(2px);
+        }
+        
+        /* Danger button variant */
+        .btn-danger-fancy {
+            background: #dc3545;
+            color: #fff;
+        }
+        .btn-danger-fancy:hover {
+            background: #c02d3b;
+        }
+
+        /* Toggle Switches */
+        .form-switch .form-check-input {
+            width: 3.5rem;
+            height: 1.5rem;
+            background-color: #ced4da;
+            border: none;
+            transition: background-color var(--transition-fast), transform var(--transition-fast);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%236c757d'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: left center;
+        }
+        .form-switch .form-check-input:checked {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23f8f9fa'/%3e%3c/svg%3e");
+            background-color: #5A67F1;
+            border-color: #5A67F1;
+            transform: translateX(1rem);
+        }
+        body.dark-mode .form-switch .form-check-input {
+            background-color: #495057;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23f8f9fa'/%3e%3c/svg%3e");
+        }
+        body.dark-mode .form-switch .form-check-input:checked {
+            background-color: #5A67F1;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%231a2235'/%3e%3c/svg%3e");
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.6s forwards;
+            max-width: 800px;
+            margin: auto;
+        }
+        .tab-pane.show {
+            display: block;
+        }
+
+        /* ========================================================================= */
+        /* DESKTOP LAYOUT (>= 992px)                      */
+        /* ========================================================================= */
+        @media (min-width: 992px) {
+            body { padding-bottom: 0; }
+            .page-container {
+                display: flex;
+                min-height: 100vh;
+                background-color: var(--secondary-bg);
+            }
+            body.dark-mode .page-container {
+                background-color: #11152a;
+            }
+            .desktop-only { display: block; }
+            .mobile-only { display: none !important; }
+
+            .sidebar-nav {
+                width: 300px;
+                flex-shrink: 0;
+                padding: 4rem 2rem;
+                background: linear-gradient(180deg, #F9FBFF, #EAEFF6);
+                transition: background-color var(--transition-smooth);
+            }
+            body.dark-mode .sidebar-nav {
+                background: linear-gradient(180deg, #181F33, #0D1223);
+            }
+
+            .sidebar-nav a {
+                padding: 1.2rem;
+                font-size: 1.1rem;
+                margin-bottom: 0.8rem;
+                border-radius: 1.5rem;
+                color: #555;
+                font-weight: 500;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                transition: all var(--transition-fast);
+            }
+            body.dark-mode .sidebar-nav a {
+                color: #a1b2c3;
+            }
+            
+            .sidebar-nav a:hover, .sidebar-nav a.active {
+                color: #fff;
+                background: var(--primary-gradient);
+                box-shadow: 0 4px 15px rgba(90, 103, 241, 0.4);
+                transform: translateY(-2px);
+            }
+            .sidebar-nav a:hover i, .sidebar-nav a.active i {
+                color: #fff !important;
+            }
+
+            .sidebar-nav a i {
+                margin-right: 1rem;
+                font-size: 1.4rem;
+                color: #888;
+                transition: all var(--transition-fast);
+            }
+            body.dark-mode .sidebar-nav a i {
+                color: #a1b2c3;
+            }
+
+            .main-content {
+                flex: 1;
+                padding: 4rem;
+                overflow-x: hidden;
+            }
+        }
+
+        /* ========================================================================= */
+        /* MOBILE LAYOUT (< 992px)                       */
+        /* ========================================================================= */
+        @media (max-width: 991.98px) {
+            .mobile-only { display: block; }
+            .desktop-only { display: none !important; }
+            body {
+                padding-bottom: 100px;
+            }
+            .main-content {
+                padding: 1rem;
+                padding-top: 3rem;
+            }
+            .bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90%;
+                max-width: 500px;
+                background: rgba(255, 255, 255, 0.4);
+                backdrop-filter: blur(30px);
+                border-radius: 3rem;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                z-index: 1000;
+                padding: 0.75rem 0.5rem;
+                justify-content: space-around;
+                align-items: center;
+                height: 90px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            body.dark-mode .bottom-nav {
+                background: rgba(24, 31, 51, 0.6);
+                box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            .bottom-nav a {
+                flex-grow: 1;
+                text-align: center;
+                color: #888;
+                text-decoration: none;
+                font-size: 0.8rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: color 0.4s;
+            }
+            body.dark-mode .bottom-nav a {
+                color: #a1b2c3;
+            }
+            .bottom-nav a.active {
+                color: var(--primary-dark);
+                font-weight: 600;
+            }
+            body.dark-mode .bottom-nav a.active {
+                color: var(--primary-light);
+            }
+            .bottom-nav a i {
+                font-size: 2.5rem;
+                transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+            body.dark-mode .bottom-nav a.active i {
+                background: -webkit-linear-gradient(45deg, #6B8AFD, #5A67F1);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-shadow: 0 0 15px rgba(90, 103, 241, 0.7);
+            }
+            .bottom-nav a.active i {
+                transform: scale(1.25) translateY(-5px);
+            }
+            .bottom-nav a:hover i {
+                transform: scale(1.1);
+            }
+
+            .bottom-nav .dropdown-menu {
+                position: absolute;
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 250px;
+                padding: 10px;
+                border-radius: 1.5rem;
+                background-color: var(--card-bg-light);
+                backdrop-filter: blur(25px);
+                -webkit-backdrop-filter: blur(25px);
+                border: 1px solid var(--border-color-light);
+                box-shadow: 0 8px 40px var(--shadow-light);
+                animation: fadeIn 0.3s forwards;
+            }
+            body.dark-mode .bottom-nav .dropdown-menu {
+                background: var(--card-bg-dark);
+                border: 1px solid var(--border-color-dark);
+                box-shadow: 0 8px 40px var(--shadow-dark);
+            }
+            .bottom-nav .dropdown-item {
+                display: flex;
+                align-items: center;
+                padding: 10px 15px;
+                border-radius: 1rem;
+                text-decoration: none;
+                color: var(--text-color);
+                transition: background-color 0.2s;
+            }
+            .bottom-nav .dropdown-item i {
+                margin-right: 1rem;
+                font-size: 1.2rem;
+                color: #888;
+            }
+            .bottom-nav .dropdown-item:hover {
+                background-color: rgba(90, 103, 241, 0.1);
+                color: #5A67F1;
+            }
+            .bottom-nav .dropdown-item:hover i {
+                color: #5A67F1;
+            }
+            body.dark-mode .bottom-nav .dropdown-item {
+                color: #F0F2F5;
+            }
+            body.dark-mode .bottom-nav .dropdown-item:hover {
+                background-color: rgba(90, 103, 241, 0.1);
+                color: #8E98FF;
+            }
+            body.dark-mode .bottom-nav .dropdown-item:hover i {
+                color: #8E98FF;
+            }
+
+            .list-group-plus .list-group-item {
+                padding: 1.25rem 1rem;
+                border-radius: 1.5rem;
+                margin-bottom: 0.5rem;
+                transition: background-color 0.2s;
+            }
+            .list-group-plus .list-group-item:hover {
+                background-color: rgba(90, 103, 241, 0.1);
+            }
+            body.dark-mode .list-group-plus .list-group-item:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+
+<div class="page-container">
+    
+    <aside class="sidebar-nav desktop-only">
+        <h2 class="mb-5">Settings</h2>
+        <a href="{% url 'products_app:home' %}" class="mb-3 nav-link-home"><i class="bi bi-house-fill"></i><span>Accueil</span></a>
+        <a href="#profil" class="nav-link-tab active"><i class="bi bi-person-fill"></i><span>Profil</span></a>
+        <a href="#securite" class="nav-link-tab"><i class="bi bi-shield-lock-fill"></i><span>Sécurité</span></a>
+        <a href="#notifications" class="nav-link-tab"><i class="bi bi-bell-fill"></i><span>Notifications</span><span class="badge rounded-pill bg-danger ms-auto animate">3</span></a>
+        <a href="#connexions" class="nav-link-tab"><i class="bi bi-laptop-fill"></i><span>Connexions</span></a>
+        <a href="#langue" class="nav-link-tab"><i class="bi bi-translate"></i><span>Langue</span></a>
+        <a href="#preferences" class="nav-link-tab"><i class="bi bi-sliders"></i><span>Préférences</span></a>
+        <a href="#accessibilite" class="nav-link-tab"><i class="bi bi-eye-fill"></i><span>Accessibilité</span></a>
+        <a href="#historique" class="nav-link-tab"><i class="bi bi-clock-history"></i><span>Historique</span></a>
+        <a href="#support" class="nav-link-tab"><i class="bi bi-life-preserver"></i><span>Support</span></a>
+    </aside>
+
+    <main class="main-content">
+        <div class="mobile-only">
+            <h1 class="page-title">Paramètres</h1>
+        </div>
+        
+        <div id="profil" class="tab-pane show">
+            <div class="card card-glass">
+                <h3 class="card-title mb-4">Informations du profil</h3>
+                <div class="flex-center flex-column flex-md-row mb-4">
+                    {% if user.profile.photo %}
+                        <img src="{{ user.profile.photo.url }}" class="rounded-circle me-md-4 mb-3 mb-md-0" width="120" height="120" style="object-fit:cover;">
+                    {% else %}
+                        <img src="{% static 'images/avatar_default.png' %}" class="rounded-circle me-md-4 mb-3 mb-md-0" width="120" height="120" style="object-fit:cover;">
+                    {% endif %}
+                    <div class="text-center text-md-start">
+                        <h4 class="mb-0">{{ user.username }}</h4>
+                        <p class="mb-1 text-muted">{{ user.email }}</p>
+                        <small class="text-secondary">Membre depuis {{ user.date_joined|date:"d/m/Y" }}</small>
+                    </div>
+                </div>
+                <div class="d-flex flex-column flex-md-row gap-3">
+                    <a href="{% url 'accounts:edit_profile' %}" class="btn btn-primary btn-fancy"><i class="bi bi-pencil-fill me-1"></i> Modifier le profil</a>
+                    <a href="{% url 'accounts:password_change' %}" class="btn btn-warning btn-fancy"><i class="bi bi-key-fill me-1"></i> Changer le mot de passe</a>
+    
+                </div>
+            </div>
+        </div>
+
+        <div id="securite" class="tab-pane">
+            <div class="card card-glass">
+                <h3 class="card-title mb-4">Sécurité avancée</h3>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
+                        Dernier changement de mot de passe
+                        <span class="text-muted">03/09/2025</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
+                        Authentification à deux facteurs (2FA)
+                        <span class="text-success">Activée</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
+                        Authentification par email
+                        <span class="text-success">Active</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
+                        Authentification par mobile
+                        <span class="text-success">Active</span>
+                    </li>
+                </ul>
+                <div class="mt-4 d-flex flex-column flex-md-row gap-3">
+                    <a href="{% url 'accounts:password_change' %}" class="btn btn-warning btn-fancy"><i class="bi bi-key-fill me-1"></i> Changer le mot de passe</a>
+                    <a href="#" class="btn btn-danger-fancy btn-fancy"><i class="bi bi-exclamation-triangle-fill me-1"></i> Déconnecter tous les appareils</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="notifications" class="tab-pane">
+            <div class="card card-glass">
+                <h3 class="card-title mb-4">Préférences de notifications</h3>
+                <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
+                    <label class="form-check-label" for="notifEmail">Notifications par email</label>
+                    <input class="form-check-input" type="checkbox" id="notifEmail" checked>
+                </div>
+                <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
+                    <label class="form-check-label" for="notifMobile">Notifications mobile</label>
+                    <input class="form-check-input" type="checkbox" id="notifMobile">
+                </div>
+                <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
+                    <label class="form-check-label" for="notifSMS">Notifications SMS</label>
+                    <input class="form-check-input" type="checkbox" id="notifSMS">
+                </div>
+                <div class="form-check form-switch d-flex justify-content-between align-items-center">
+                    <label class="form-check-label" for="notifPush">Notifications push</label>
+                    <input class="form-check-input" type="checkbox" id="notifPush">
+                </div>
+            </div>
+        </div>
+
+        <div id="connexions" class="tab-pane">
+            <div class="card card-glass">
+                <h3 class="card-title mb-4">Connexions récentes</h3>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
+                        <div><i class="bi bi-browser-chrome me-2"></i> Chrome - Windows 10</div>
+                        <span class="text-muted">Hier 14:32</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
+                        <div><i class="bi bi-browser-firefox me-2"></i> Firefox - MacOS</div>
+                        <span class="text-muted">02/09/2025 09:10</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
+                        <div><i class="bi bi-phone-fill me-2"></i> Mobile - Android</div>
+                        <span class="text-muted">01/09/2025 21:45</span>
+                    </li>
+                </ul>
+                <div class="mt-4">
+                    <a href="#" class="btn btn-danger-fancy btn-fancy w-100"><i class="bi bi-box-arrow-right me-1"></i> Déconnecter tous les appareils</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="langue" class="tab-pane">
+            <div class="card card-glass">
+                <h3 class="card-title mb-4">Langue et fuseau horaire</h3>
+                <label for="langSelect" class="form-label">Langue de l’interface</label>
+                <select class="form-select mb-4" id="langSelect">
+                    <option value="fr" selected>Français</option>
+                    <option value="en">Anglais</option>
+                    <option value="es">Espagnol</option>
+                </select>
+                <label for="timezoneSelect" class="form-label">Fuseau horaire</label>
+                <select class="form-select" id="timezoneSelect">
+                    <option value="UTC+1" selected>UTC+1 (Alger)</option>
+                    <option value="UTC+0">UTC+0 (GMT)</option>
+                    <option value="UTC+2">UTC+2 (Paris)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="preferences" class="tab-pane">
+            <div class="card card-glass">
+                <h3 class="card-title mb-4">Préférences générales</h3>
+                <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
+                    <label class="form-check-label" for="prefDarkMode">Mode sombre</label>
+                    <input class="form-check-input" type="checkbox" id="prefDarkMode" checked>
+                </div>
+                <div class="form-check form-switch d-flex justify-content-between align-items-center">
+                    <label class="form-check-label" for="prefCompactView">Vue compacte</label>
+                    <input class="form-check-input" type="checkbox" id="prefCompactView">
+                </div>
+            </div>
+        </div>
+
+        <div id="accessibilite" class="tab-pane">
+            <div class="card card-glass">
+                <h3 class="card-title mb-4">Paramètres d'accessibilité</h3>
+                <div class="form-check form-switch mb-3 d-flex justify-content-between align-items-center">
+                    <label class="form-check-label" for="accHighContrast">Contraste élevé</label>
+                    <input class="form-check-input" type="checkbox" id="accHighContrast">
+                </div>
+                <div class="form-check form-switch d-flex justify-content-between align-items-center">
+                    <label class="form-check-label" for="accLargeFont">Police large</label>
+                    <input class="form-check-input" type="checkbox" id="accLargeFont">
+                </div>
+            </div>
+        </div>
+
+        <div id="historique" class="tab-pane">
+            <div class="card card-glass">
+                <h3 class="card-title mb-4">Historique des actions</h3>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
+                        <div><i class="bi bi-check-circle-fill text-success me-2"></i> Connexion depuis Chrome - Windows 10</div>
+                        <span class="text-muted">Hier 14:32</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
+                        <div><i class="bi bi-lock-fill text-warning me-2"></i> Changement de mot de passe</div>
+                        <span class="text-muted">02/09/2025</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent border-0">
+                        <div><i class="bi bi-shield-fill-check text-success me-2"></i> Activation de la 2FA</div>
+                        <span class="text-muted">01/09/2025</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="support" class="tab-pane">
+            <div class="card card-glass">
+                <h3 class="card-title mb-4">Support & aide</h3>
+                <p>Vous pouvez contacter notre support via :</p>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item bg-transparent border-0"><i class="bi bi-envelope-fill me-2"></i> support@example.com</li>
+                    <li class="list-group-item bg-transparent border-0"><i class="bi bi-telephone-fill me-2"></i> +213 123 456 789</li>
+                    <li class="list-group-item bg-transparent border-0"><i class="bi bi-chat-dots-fill me-2"></i> Chat en direct</li>
+                </ul>
+                <a href="#" class="btn btn-info btn-fancy mt-4 w-100"><i class="bi bi-life-preserver me-1"></i> Ouvrir un ticket</a>
+            </div>
+        </div>
+
+        <div id="plus" class="tab-pane">
+            <div class="card card-glass">
+                <h3 class="card-title mb-4">Toutes les options</h3>
+                <div class="list-group list-group-plus">
+                    <a href="#securite" class="list-group-item list-group-item-action border-0 bg-transparent nav-link-tab"><i class="bi bi-shield-lock-fill me-3"></i>Sécurité</a>
+                    <a href="#connexions" class="list-group-item list-group-item-action border-0 bg-transparent nav-link-tab"><i class="bi bi-laptop-fill me-3"></i>Connexions</a>
+                    <a href="#langue" class="list-group-item list-group-item-action border-0 bg-transparent nav-link-tab"><i class="bi bi-translate me-3"></i>Langue</a>
+                    <a href="#preferences" class="list-group-item list-group-item-action border-0 bg-transparent nav-link-tab"><i class="bi bi-sliders me-3"></i>Préférences</a>
+                    <a href="#accessibilite" class="list-group-item list-group-item-action border-0 bg-transparent nav-link-tab"><i class="bi bi-eye-fill me-3"></i>Accessibilité</a>
+                    <a href="#historique" class="list-group-item list-group-item-action border-0 bg-transparent nav-link-tab"><i class="bi bi-clock-history me-3"></i>Historique</a>
+                    <a href="#support" class="list-group-item list-group-item-action border-0 bg-transparent nav-link-tab"><i class="bi bi-life-preserver me-3"></i>Support</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<nav class="bottom-nav mobile-only">
+    <a href="{% url 'products_app:home' %}" class="nav-link-tab {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+        <i class="bi bi-house-fill"></i>
+        <span>Accueil</span>
+    </a>
+    <a href="#profil" class="nav-link-tab active">
+        <i class="bi bi-person-fill"></i>
+        <span>Profil</span>
+    </a>
+    <a href="#securite" class="nav-link-tab">
+        <i class="bi bi-shield-lock-fill"></i>
+        <span>Sécurité</span>
+    </a>
+    <a href="#notifications" class="nav-link-tab">
+        <i class="bi bi-bell-fill"></i>
+        <span>Notifs</span>
+    </a>
+    <a href="#plus" class="nav-link-tab">
+        <i class="bi bi-three-dots"></i>
+        <span>Plus</span>
+    </a>
+</nav>
+
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true" id="toastExample">
+        <div class="d-flex">
+            <div class="toast-body">Bienvenue dans vos paramètres !</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const navLinks = document.querySelectorAll('.nav-link-tab');
+        const panes = document.querySelectorAll('.tab-pane');
+        const darkModeToggle = document.getElementById('prefDarkMode');
+
+        // Function to activate the correct tab based on the URL hash or a given ID
+        const activateTab = (targetId) => {
+            panes.forEach(p => p.classList.remove('show'));
+            navLinks.forEach(link => link.classList.remove('active'));
+
+            const pane = document.querySelector(targetId);
+            if (pane) {
+                pane.classList.add('show');
+            }
+
+            document.querySelectorAll(`[href="${targetId}"]`).forEach(link => {
+                link.classList.add('active');
+            });
+        };
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', e => {
+                const targetId = link.getAttribute('href');
+                if (targetId.startsWith('#')) {
+                    e.preventDefault();
+                    activateTab(targetId);
+                    window.history.pushState(null, '', targetId);
+                }
+            });
+        });
+
+        window.addEventListener('popstate', () => {
+            const hash = window.location.hash || '#profil';
+            activateTab(hash);
+        });
+
+        // Dark mode toggle & persistence with localStorage
+        const enableDarkMode = () => {
+            document.body.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark');
+            if (darkModeToggle) darkModeToggle.checked = true;
+        };
+        const disableDarkMode = () => {
+            document.body.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light');
+            if (darkModeToggle) darkModeToggle.checked = false;
+        };
+
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme === 'dark') {
+            enableDarkMode();
+        } else {
+            disableDarkMode();
+        }
+
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', () => {
+                if (darkModeToggle.checked) {
+                    enableDarkMode();
+                } else {
+                    disableDarkMode();
+                }
+            });
+        }
+
+        const initialTab = window.location.hash || '#profil';
+        activateTab(initialTab);
+        
+        const toastEl = document.getElementById('toastExample');
+        if (toastEl) {
+            const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+            toast.show();
+        }
+    });
+</script>
+
+</body>
+</html>

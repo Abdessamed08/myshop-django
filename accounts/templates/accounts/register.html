@@ -1,0 +1,41 @@
+{% extends "accounts/base.html" %}
+{% block title %}Créer un compte{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center vh-100" style="background-color: #f4f5f7;">
+    <div class="card shadow-lg p-4" style="width: 400px; border-radius: 1rem;">
+        <h2 class="text-center mb-4" style="font-weight: bold; color: #333;">Créer un compte</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="username" class="form-label">Nom d'utilisateur</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Entrez votre nom d'utilisateur" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Adresse e-mail</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Entrez votre email" required>
+            </div>
+            <div class="mb-3">
+                <label for="password1" class="form-label">Mot de passe</label>
+                <input type="password" class="form-control" id="password1" name="password1" placeholder="Entrez votre mot de passe" required>
+            </div>
+            <div class="mb-3">
+                <label for="password2" class="form-label">Confirmez le mot de passe</label>
+                <input type="password" class="form-control" id="password2" name="password2" placeholder="Confirmez votre mot de passe" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" style="background: linear-gradient(to right, #ff416c, #ff4b2b); border:none;">Créer un compte</button>
+        </form>
+
+        <p class="text-center mt-3 text-muted">
+            Vous avez déjà un compte ? <a href="{% url 'accounts:login' %}">Connexion</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

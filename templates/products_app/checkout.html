@@ -1,0 +1,882 @@
+{% extends "accounts/base.html" %}
+
+{% block extra_css %}
+<style>
+/* =========================
+   Design system (variables)
+   ========================= */
+:root{
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --muted: #6c757d;
+  --accent: #0d6efd;
+  --accent-600: #084298;
+  --surface: #f8fafc;
+  --border: #e9eef6;
+  --danger: #d9534f;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 8px 30px rgba(15,23,36,0.06);
+  --container-max: 1100px;
+  --touch-size: 48px;
+  --focus-ring: 3px;
+  --transition-fast: 150ms;
+  --z-toast: 1200;
+}
+
+/* =========================
+   Base & Reset
+   ========================= */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background:var(--bg);
+  color:#0f1724;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+  -webkit-text-size-adjust:100%;
+  font-size:15px;
+}
+
+/* Layout container */
+.checkout-shell{
+  max-width:var(--container-max);
+  margin:28px auto;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* Grid: left form + right summary */
+.grid{
+  display:grid;
+  grid-template-columns: 1fr 380px;
+  gap:20px;
+  align-items:start;
+}
+
+/* Card */
+.card-panel{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
+  overflow:hidden;
+}
+
+.card-header{
+  padding:16px 18px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.6));
+}
+
+.card-header h3{
+  margin:0;
+  font-size:1.125rem;
+  font-weight:700;
+  color:#081226;
+}
+
+.card-body{
+  padding:18px;
+}
+
+/* Form floating labels */
+.form-floating{
+  position:relative;
+  margin-bottom:8px;
+}
+.form-floating .form-control,
+.form-floating .form-select{
+  width:100%;
+  height:52px;
+  padding:1.05rem .75rem .25rem .75rem;
+  border-radius:10px;
+  border:1px solid #e6eef9;
+  background:transparent;
+  font-size:0.95rem;
+  -webkit-appearance:none;
+  appearance:none;
+}
+.form-floating textarea.form-control{
+  height:auto;
+  min-height:88px;
+  padding:0.85rem .75rem .35rem .75rem;
+  resize:vertical;
+}
+.form-floating label{
+  position:absolute;
+  left:12px;
+  top:12px;
+  padding:0 .3rem;
+  transition: all var(--transition-fast) ease;
+  background:transparent;
+  font-size:0.9rem;
+  color:var(--muted);
+  pointer-events:none;
+}
+.form-floating .form-control:focus + label,
+.form-floating .form-control:not(:placeholder-shown) + label,
+.form-floating .form-select:focus + label,
+.form-floating .form-select:not([value=""]) + label{
+  transform: translateY(-42%);
+  font-size:0.78rem;
+  color:var(--accent);
+}
+
+/* Helper text */
+.helper{
+  font-size:0.82rem;
+  color:var(--muted);
+}
+
+/* Summary */
+.summary-wrap{
+  position:relative;
+}
+.summary-card{
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.summary-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+.summary-title h4{ margin:0; font-size:1rem; font-weight:700; }
+.product-list{
+  max-height:360px;
+  overflow:auto;
+  padding-right:6px;
+}
+.product-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  padding:8px 0;
+  border-bottom:1px dashed #eef4fb;
+}
+.product-row .meta{ display:flex; flex-direction:column; gap:4px; }
+.summary-total{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px solid #f1f5fb;
+  font-size:1.02rem;
+  font-weight:700;
+}
+
+/* Buttons */
+.btn-action{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  background:linear-gradient(180deg,var(--accent),var(--accent-600));
+  color:#fff;
+  border:none;
+  padding:12px 16px;
+  border-radius:10px;
+  font-weight:700;
+  font-size:0.98rem;
+  cursor:pointer;
+  width:100%;
+  box-shadow:0 6px 18px rgba(13,110,253,0.12);
+}
+.btn-action[disabled]{ opacity:0.7; cursor:not-allowed; transform:none; }
+.btn-action:active{ transform:translateY(1px) }
+
+.btn-ghost{
+  background:transparent;
+  border:1px solid #e6eef9;
+  color:#223;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* Compact utility */
+.row-gap{display:flex;gap:12px}
+.mb-2{margin-bottom:8px}
+.mt-3{margin-top:12px}
+.text-muted{color:var(--muted);font-size:0.9rem}
+
+/* Validation */
+.input-error{border-color:var(--danger) !important}
+.error-text{color:var(--danger);font-size:0.85rem;margin-top:6px}
+
+/* Loader */
+.loader{
+  width:18px;height:18px;border:2px solid #e9f0ff;border-left-color:var(--accent);
+  border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;
+}
+@keyframes spin{ to{ transform:rotate(360deg);} }
+
+/* Small screens - mobile-first improvements */
+@media(max-width:991px){
+  .grid{grid-template-columns:1fr; gap:14px}
+  .summary-wrap{position:static;height:auto}
+  .product-list{max-height:220px}
+  .checkout-shell{padding:12px; margin:12px}
+  .card-header{padding:12px}
+  .card-body{padding:14px}
+  .form-floating .form-control,
+  .form-floating .form-select{ height:48px; font-size:0.94rem; padding:1rem .65rem .25rem .65rem; border-radius:10px }
+  .row { display:flex; flex-direction:column; gap:10px; }
+  .row > div { width:100% !important; min-width:0 }
+  .btn-action, .btn-ghost { padding:14px; font-size:1rem; border-radius:12px }
+  .product-list{ max-height:160px }
+}
+
+/* Extra small: touch targets, accordion style */
+@media(max-width:576px){
+  :root{ --touch-size:52px }
+  .card-header h3{ font-size:1rem }
+  .form-floating label{ left:14px }
+  .helper{ font-size:0.9rem }
+}
+
+/* Accessibility focus */
+.form-control:focus, .form-select:focus{ outline: var(--focus-ring) solid rgba(13,110,253,0.08); box-shadow:none; }
+
+/* Summary accordion - hidden by default on mobile (progressive enhancement) */
+.summary-accordion {
+  display:none;
+}
+@media(max-width:991px){
+  .summary-accordion { display:block; }
+  .summary-static { display:none; }
+}
+
+/* Accessible toast */
+.toast {
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:18px;
+  background:rgba(10,20,40,0.96);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:10px;
+  box-shadow:0 8px 30px rgba(2,6,23,0.45);
+  z-index:var(--z-toast);
+  font-size:0.95rem;
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+/* small helper to hide elements from assistive tech */
+.sr-only{ position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+
+/* Prevent large table-like widths */
+select.form-select { appearance:none; -webkit-appearance:none; -moz-appearance:none; background-image: none; }
+
+/* Subtle transitions */
+.product-row, .btn-action, .btn-ghost { transition: all var(--transition-fast) ease; }
+
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="checkout-shell" id="checkout-shell">
+  <div class="grid">
+
+    <!-- LEFT: FORM -->
+    <div class="card-panel" aria-labelledby="ship-info-heading">
+      <div class="card-header">
+        <h3 id="ship-info-heading">Informations de livraison</h3>
+      </div>
+
+      <div class="card-body">
+        <form id="checkout-form" method="post" novalidate aria-describedby="form-help">
+          {% csrf_token %}
+          <div id="form-help" class="sr-only">Formulaire de confirmation de commande. Tous les champs marqués d'un astérisque sont requis.</div>
+
+          <!-- Personal -->
+          <section aria-label="Coordonnées personnelles" style="margin-bottom:14px">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <strong>Coordonnées</strong>
+              <span class="helper">Les champs marqués * sont requis</span>
+            </div>
+
+            <div class="row" style="gap:12px;">
+              <div style="flex:1">
+                <div class="form-floating">
+                  {{ form.full_name }}
+                  <label for="id_full_name">Nom complet *</label>
+                </div>
+              </div>
+
+              <div style="width:220px; min-width:0;">
+                <div class="form-floating">
+                  {{ form.phone }}
+                  <label for="id_phone">Téléphone *</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mt-3" style="gap:12px;">
+              <div style="flex:1">
+                <div class="form-floating">
+                  {{ form.email }}
+                  <label for="id_email">Email *</label>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <hr style="border:none;border-top:1px solid var(--border); margin:18px 0">
+
+          <!-- Address -->
+          <section aria-label="Adresse de livraison" style="margin-bottom:10px">
+            <strong>Adresse</strong>
+            <div class="text-muted" style="font-size:0.88rem; margin-top:4px">Sélectionnez Wilaya → Daira → Commune puis indiquez l'adresse détaillée</div>
+
+            <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:140px">
+                <div class="form-floating">
+                  {{ form.wilaya }}
+                  <label for="id_wilaya">Wilaya *</label>
+                </div>
+              </div>
+
+              <div style="flex:1; min-width:140px">
+                <div class="form-floating">
+                  {{ form.daira }}
+                  <label for="id_daira">Daira *</label>
+                </div>
+              </div>
+
+              <div style="flex:1; min-width:140px">
+                <div class="form-floating">
+                  {{ form.commune }}
+                  <label for="id_commune">Commune *</label>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px">
+              <div class="form-floating">
+                {{ form.address_details }}
+                <label for="id_address_details">Adresse détaillée (rue, numéro, immeuble) *</label>
+              </div>
+              <div class="text-muted" style="margin-top:8px">Ex: Rue Didouche Mourad, Immeuble 12, Appartement 4</div>
+            </div>
+          </section>
+
+          <hr style="border:none;border-top:1px solid var(--border); margin:18px 0">
+
+          <!-- Delivery options -->
+          <section aria-label="Méthode de livraison" style="margin-bottom:14px">
+            <strong>Méthode de livraison</strong>
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <label class="btn-ghost" style="display:flex; align-items:center; gap:10px;">
+                <input type="radio" name="shipping" value="standard" checked style="margin-right:8px" aria-label="Standard 3 à 5 jours">
+                Standard — 3–5 jours
+              </label>
+              <label class="btn-ghost" style="display:flex; align-items:center; gap:10px;">
+                <input type="radio" name="shipping" value="express" style="margin-right:8px" aria-label="Express 1 à 2 jours">
+                Express — 1–2 jours
+              </label>
+            </div>
+            <div class="text-muted" style="margin-top:8px; font-size:0.88rem">Les délais et tarifs sont indicatifs.</div>
+          </section>
+<!-- Payment summary & confirm -->
+<div style="display:flex; gap:12px; margin-top:18px; align-items:center;">
+  <div style="flex:1">
+    <!-- Le bouton confirme maintenant le formulaire -->
+    <button type="submit" id="confirm-btn" class="btn-action">
+        Confirmer la commande
+    </button>
+
+  </div>
+  <div style="width:120px; text-align:right">
+    <button type="button" id="clear-cart" class="btn-ghost">
+      Vider le panier
+    </button>
+  </div>
+</div>
+
+<!-- Messages de validation / succès -->
+<div id="form-messages" style="margin-top:10px" role="alert" aria-live="polite">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+
+
+            
+
+    <!-- RIGHT: SUMMARY (desktop static, mobile accordion) -->
+    <div class="summary-wrap" aria-label="Résumé de la commande">
+      <!-- Accordion for mobile -->
+      <div class="summary-accordion card-panel" aria-hidden="false">
+        <div class="card-header" style="padding:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; gap:12px; align-items:center;">
+              <strong>Résumé de la commande</strong>
+              <div class="helper" style="font-size:0.86rem">Vérifiez avant de confirmer</div>
+            </div>
+            <button id="toggle-summary" class="btn-ghost" aria-expanded="false" aria-controls="summary-panel">Voir</button>
+          </div>
+        </div>
+
+        <div id="summary-panel" class="card-body" style="display:none; padding-top:12px;">
+          <div class="product-list" id="product-list-acc">
+            {% if cart_items %}
+              {% for item in cart_items %}
+                <div class="product-row">
+                  <div class="meta">
+                    <div style="font-weight:600">{{ item.product.name }}</div>
+                    <div class="text-muted" style="font-size:0.86rem">Qté: {{ item.qty }}</div>
+                  </div>
+                  <div style="font-weight:700">{{ item.subtotal }} DA</div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="text-muted">Votre panier est vide.</div>
+            {% endif %}
+          </div>
+
+          <div class="summary-total" aria-live="polite">
+            <div>Total estimé</div>
+            <div id="summary-total-acc">{{ total }} DA</div>
+          </div>
+
+          <div style="margin-top:8px; display:flex; gap:8px;">
+            <button class="btn-ghost" id="edit-cart-acc" onclick="window.location.href='{% url 'products_app:cart' %}'">Modifier le panier</button>
+            <button class="btn-ghost" id="continue-shopping-acc" onclick="window.location.href='{% url 'products_app:home' %}'">Continuer vos achats</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Static summary for desktop -->
+      <div class="summary-static card-panel summary-card" aria-hidden="false">
+        <div class="summary-title">
+          <h4>Résumé de la commande</h4>
+          <div class="helper">Vérifiez avant de confirmer</div>
+        </div>
+
+        <div class="product-list" id="product-list">
+          {% if cart_items %}
+            {% for item in cart_items %}
+              <div class="product-row">
+                <div class="meta">
+                  <div style="font-weight:600">{{ item.product.name }}</div>
+                  <div class="text-muted" style="font-size:0.86rem">Qté: {{ item.qty }}</div>
+                </div>
+                <div style="font-weight:700">{{ item.subtotal }} DA</div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-muted">Votre panier est vide.</div>
+          {% endif %}
+        </div>
+
+        <div class="summary-total" aria-live="polite">
+          <div>Total estimé</div>
+          <div id="summary-total">{{ total }} DA</div>
+        </div>
+
+        <div style="margin-top:8px; display:flex; gap:8px;">
+          <button class="btn-ghost" id="edit-cart" onclick="window.location.href='{% url 'products_app:cart' %}'">Modifier le panier</button>
+          <button class="btn-ghost" id="continue-shopping" onclick="window.location.href='{% url 'products_app:home' %}'">Continuer vos achats</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+/* ==============================
+   Utilities & helpers
+   ============================== */
+function qs(sel){ return document.querySelector(sel) }
+function qsa(sel){ return Array.from(document.querySelectorAll(sel)) }
+function el(tag, props){ let e=document.createElement(tag); if(props) Object.assign(e,props); return e }
+function debounce(fn, wait=200){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), wait); } }
+
+/* Safe JSON parse */
+function safeJson(text){ try { return JSON.parse(text) } catch(e){ return null } }
+
+/* Toast (accessible) */
+function showToast(message, timeout=3500){
+  const id = 'global-toast'
+  let t = qs('#' + id)
+  if(t){ t.textContent = message; return }
+  t = el('div',{id:id, className:'toast', role:'status', 'aria-live':'polite', textContent: message})
+  document.body.appendChild(t)
+  setTimeout(()=>{ t.style.opacity = '0'; t.addEventListener('transitionend', ()=> t.remove(), {once:true}) }, timeout)
+}
+
+/* ==============================
+   DOM refs
+   ============================== */
+const wilayaSel = qs('#id_wilaya')
+const dairaSel = qs('#id_daira')
+const communeSel = qs('#id_commune')
+const confirmBtn = qs('#confirm-btn')
+const confirmText = qs('#confirm-text')
+const form = qs('#checkout-form')
+const productList = qs('#product-list')
+const totalElem = qs('#summary-total')
+const formMessages = qs('#form-messages')
+const clearCartBtn = qs('#clear-cart')
+const toggleSummaryBtn = qs('#toggle-summary')
+const summaryPanel = qs('#summary-panel')
+const productListAcc = qs('#product-list-acc')
+const totalElemAcc = qs('#summary-total-acc')
+
+/* ==============================
+   Fetch wrapper with error handling
+   ============================== */
+async function fetchJson(url, opts){
+  opts = opts || {}
+  const cfg = Object.assign({ credentials:'same-origin', headers: {} }, opts)
+  try{
+    const resp = await fetch(url, cfg)
+    if(!resp.ok) {
+      const text = await resp.text().catch(()=>null)
+      let err = `Erreur réseau (${resp.status})`
+      // try better message
+      const j = safeJson(text)
+      if(j && j.error) err = j.error
+      throw new Error(err)
+    }
+    // try json, fallback text
+    const ct = resp.headers.get('Content-Type') || ''
+    if(ct.includes('application/json')) return resp.json()
+    return resp.text().then(t=> safeJson(t) || t)
+  }catch(err){
+    console.error('fetchJson', err)
+    throw err
+  }
+}
+
+/* Clear select and placeholder */
+function clearSelect(sel, placeholder='-- Sélectionner --'){
+  if(!sel) return
+  sel.innerHTML = ''
+  const opt = document.createElement('option')
+  opt.value = ''
+  opt.textContent = placeholder
+  sel.appendChild(opt)
+  sel.value = ''
+}
+
+/* ==============================
+   Dependent selects (wilaya -> daira -> commune)
+   progressive enhancement: works only if JS available
+   ============================== */
+if(wilayaSel){
+  if(!dairaSel) console.warn('daira select missing')
+  if(!communeSel) console.warn('commune select missing')
+
+  wilayaSel.addEventListener('change', async function(){
+    const id = this.value
+    clearSelect(dairaSel, '-- Sélectionner une daira --')
+    clearSelect(communeSel, '-- Sélectionner une commune --')
+    if(!id) {
+      if(dairaSel) dairaSel.disabled = true
+      if(communeSel) communeSel.disabled = true
+      return
+    }
+    if(dairaSel) {
+      dairaSel.disabled = false
+      const loadOpt = el('option',{value:'', textContent:'Chargement...', disabled:true})
+      dairaSel.appendChild(loadOpt)
+    }
+    try {
+      const data = await fetchJson(`/ajax/load-dairas/?wilaya_id=${encodeURIComponent(id)}`)
+      clearSelect(dairaSel, '-- Sélectionner une daira --')
+      if(Array.isArray(data) && data.length){
+        data.forEach(d=>{
+          const o = document.createElement('option')
+          o.value = d.id
+          o.textContent = d.name
+          dairaSel.appendChild(o)
+        })
+      } else {
+        const o = document.createElement('option')
+        o.value = ''
+        o.textContent = 'Aucune daira trouvée'
+        dairaSel.appendChild(o)
+      }
+    } catch(err){
+      clearSelect(dairaSel, '-- Erreur --')
+      console.error(err)
+      showToast('Impossible de charger les dairas')
+    }
+  })
+
+  dairaSel.addEventListener('change', async function(){
+    const id = this.value
+    clearSelect(communeSel, '-- Sélectionner une commune --')
+    if(!id){ communeSel.disabled = true; return }
+    communeSel.disabled = false
+    const loadOpt = el('option',{value:'', textContent:'Chargement...', disabled:true})
+    communeSel.appendChild(loadOpt)
+    try{
+      const data = await fetchJson(`/ajax/load-communes/?daira_id=${encodeURIComponent(id)}`)
+      clearSelect(communeSel, '-- Sélectionner une commune --')
+      if(Array.isArray(data) && data.length){
+        data.forEach(c=>{
+          const o = document.createElement('option')
+          o.value = c.id
+          o.textContent = c.name
+          communeSel.appendChild(o)
+        })
+      } else {
+        const o = document.createElement('option'); o.value=''; o.textContent='Aucune commune trouvée'; communeSel.appendChild(o)
+      }
+    }catch(err){
+      clearSelect(communeSel, '-- Erreur --')
+      console.error(err)
+      showToast('Impossible de charger les communes')
+    }
+  })
+}
+
+/* ==============================
+   Client-side validation
+   ============================== */
+function showError(field, message){
+  let elField = qs(`#id_${field}`)
+  if(!elField) return
+  elField.classList.add('input-error')
+  let err = elField.parentNode.querySelector('.error-text')
+  if(!err){
+    err = document.createElement('div'); err.className='error-text'
+    elField.parentNode.appendChild(err)
+  }
+  err.textContent = message
+  elField.setAttribute('aria-invalid','true')
+}
+
+function clearErrors(){
+  qsa('.input-error').forEach(e=>{ e.classList.remove('input-error'); e.removeAttribute('aria-invalid') })
+  qsa('.error-text').forEach(e=>e.remove())
+  if(formMessages) formMessages.innerHTML = ''
+}
+
+/* Basic checks */
+function validateForm(){
+  clearErrors()
+  let ok = true
+  const full = qs('#id_full_name')?.value?.trim()
+  const email = qs('#id_email')?.value?.trim()
+  const phone = qs('#id_phone')?.value?.trim()
+  const wilaya = qs('#id_wilaya')?.value
+  const daira = qs('#id_daira')?.value
+  const commune = qs('#id_commune')?.value
+  const addr = qs('#id_address_details')?.value?.trim()
+
+  if(!full){ showError('full_name','Veuillez indiquer votre nom complet'); ok=false }
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showError('email','Email invalide'); ok=false }
+  if(!phone || phone.length < 6){ showError('phone','Téléphone invalide'); ok=false }
+  if(!wilaya){ showError('wilaya','Choisissez une wilaya'); ok=false }
+  if(!daira){ showError('daira','Choisissez une daira'); ok=false }
+  if(!commune){ showError('commune','Choisissez une commune'); ok=false }
+  if(!addr){ showError('address_details','Entrez l\'adresse détaillée'); ok=false }
+
+  return ok
+}
+
+/* ==============================
+   Submit handling with AJAX
+   ============================== */
+if(form){
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!validateForm()) {
+      if(formMessages) formMessages.innerHTML = '<div class="error-text">Veuillez corriger les champs en rouge.</div>';
+      showToast('Corrigez les champs requis.');
+      return;
+    }
+
+    const confirmBtn = qs('#confirm-btn');
+    confirmBtn.disabled = true;
+    confirmBtn.setAttribute('aria-busy','true');
+    
+    // Ajoute un texte de chargement au bouton
+    const oldHtml = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<span class="loader"></span> Envoi en cours...';
+
+    const formData = new FormData(form);
+
+    fetch(window.location.pathname, {
+      method:'POST',
+      body: formData,
+      credentials: 'same-origin',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(async resp=>{
+      const json = await resp.json(); // Tente de parser en JSON
+      
+      if(json.success){
+        // La redirection est ici !
+        window.location.href = json.redirect;
+      } else {
+        // Afficher les erreurs du serveur
+        const err = json.error || 'Erreur lors de la commande';
+        if(formMessages) {
+          formMessages.innerHTML = `<div class="error-text">${err}</div>`;
+          if (json.errors) {
+            for (const field in json.errors) {
+              showError(field, json.errors[field][0]);
+            }
+          }
+        }
+        showToast(err);
+      }
+    }).catch(err=>{
+      console.error(err);
+      if(formMessages) formMessages.innerHTML = '<div class="error-text">Erreur réseau, réessayez.</div>';
+      showToast('Erreur réseau. Réessayez.');
+    }).finally(()=>{
+      // Réinitialiser le bouton, que la requête ait réussi ou échoué
+      confirmBtn.disabled = false;
+      confirmBtn.removeAttribute('aria-busy');
+      confirmBtn.innerHTML = oldHtml;
+    });
+  });
+}
+/* ==============================
+   Clear cart button
+   ============================== */
+if(clearCartBtn){
+  clearCartBtn.addEventListener('click', function(){
+    if(!confirm('Voulez-vous vraiment vider le panier ?')) return
+    window.location.href = '{% url "products_app:clear_cart" %}'
+  })
+}
+
+/* ==============================
+   Accordion toggle (mobile)
+   ============================== */
+if(toggleSummaryBtn && summaryPanel){
+  toggleSummaryBtn.addEventListener('click', function(){
+    const expanded = this.getAttribute('aria-expanded') === 'true'
+    if(expanded){
+      summaryPanel.style.display = 'none'
+      this.textContent = 'Voir'
+      this.setAttribute('aria-expanded','false')
+    } else {
+      summaryPanel.style.display = 'block'
+      this.textContent = 'Masquer'
+      this.setAttribute('aria-expanded','true')
+      // scroll into view for mobile ease
+      setTimeout(()=> summaryPanel.scrollIntoView({behavior:'smooth', block:'center'}), 80)
+    }
+  })
+}
+
+/* ==============================
+   Accessibility: disable selects if only placeholder
+   ============================== */
+document.addEventListener('DOMContentLoaded', function(){
+  if(dairaSel && dairaSel.options.length <= 1) dairaSel.disabled = true
+  if(communeSel && communeSel.options.length <= 1) communeSel.disabled = true
+})
+
+/* ==============================
+   Optional: dynamic total update helper
+   Exposed for future client-side qty edits
+   ============================== */
+function updateTotal(newTotal){
+  if(totalElem) totalElem.textContent = newTotal + ' DA'
+  if(totalElemAcc) totalElemAcc.textContent = newTotal + ' DA'
+}
+
+/* ==============================
+   Small enhancements: keyboard submit, enter handling
+   ============================== */
+document.addEventListener('keydown', function(e){
+  if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){
+    if(form) form.requestSubmit ? form.requestSubmit() : form.submit()
+  }
+})
+
+/* ==============================
+   End of script
+   ============================== */
+</script>
+{% endblock extra_js %} " , je veux quand le client remplir ces données et clique sur "confirmer la commande" , il me rédige vers la page order_success.html existe sur "C:\Users\AL-Athir Computer\Desktop\myshop\templates\products_app" , et voila son code "{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="{% static 'products_app/css/style.css' %}">
+    <style>
+        /* Styles simples pour le checkout */
+        .checkout-container { max-width: 800px; margin: auto; padding: 20px; }
+        .btn-action, .btn-ghost { padding: 10px 20px; border: none; cursor: pointer; }
+        .btn-action { background-color: #4CAF50; color: white; }
+        .btn-ghost { background-color: #f2f2f2; color: #333; }
+        .flex { display: flex; gap: 12px; align-items: center; }
+        .flex-1 { flex: 1; }
+        #form-messages { margin-top: 10px; color: red; }
+    </style>
+</head>
+<body>
+<div class="checkout-container">
+    <h1>Checkout</h1>
+
+    <form id="checkout-form" method="post" action="{% url 'products_app:checkout' %}" novalidate>
+        {% csrf_token %}
+        
+        <!-- Exemple de table des produits dans le panier -->
+        <table border="1" width="100%" cellpadding="10">
+            <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Prix</th>
+            </tr>
+            {% for item in cart_items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.total_price }} DZD</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- Payment summary & confirm -->
+        <div class="flex" style="margin-top: 18px;">
+            <div class="flex-1">
+                <button type="submit" id="confirm-btn" class="btn-action">
+                    <span id="confirm-text">Confirmer la commande</span>
+                </button>
+            </div>
+            <div style="width: 120px; text-align:right;">
+                <button type="button" id="clear-cart" class="btn-ghost">Vider le panier</button>
+            </div>
+        </div>
+
+        <div id="form-messages" role="alert" aria-live="polite"></div>
+    </form>
+</div>
+
+
+</body>
+</html> 

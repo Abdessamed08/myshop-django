@@ -1,0 +1,309 @@
+{% extends "accounts/base.html" %}
+
+{% block extra_css %}
+<style>
+/* ================================
+   GLOBAL STYLE
+===================================*/
+:root {
+    --primary: #0d6efd;
+    --primary-dark: #0b5ed7;
+    --success: #198754;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-600: #6c757d;
+    --gray-800: #343a40;
+    --bg-light: #f5f6fa;
+    --bg-dark: #1c1f24;
+    --text-dark: #212529;
+    --text-light: #f8f9fa;
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.06);
+    --shadow-md: 0 6px 18px rgba(0,0,0,0.12);
+    --shadow-lg: 0 10px 28px rgba(0,0,0,0.15);
+    --radius: 14px;
+}
+
+body {
+    background: var(--bg-light);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-dark);
+    transition: background .3s ease, color .3s ease;
+}
+
+/* ================================
+   DARK MODE
+===================================*/
+body.dark-mode {
+    background: var(--bg-dark);
+    color: var(--text-light);
+}
+body.dark-mode .order-card {
+    background: #2a2d32;
+    color: var(--text-light);
+}
+body.dark-mode .order-header {
+    background: linear-gradient(90deg, #495057, #343a40);
+}
+body.dark-mode .table th {
+    background: #343a40;
+    color: #f1f1f1;
+}
+body.dark-mode .empty-history {
+    color: #adb5bd;
+}
+body.dark-mode .status-badge.bg-secondary {
+    background: #495057 !important;
+}
+
+/* ================================
+   HEADER
+===================================*/
+.history-title {
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: var(--text-dark);
+    letter-spacing: -0.5px;
+}
+body.dark-mode .history-title {
+    color: var(--text-light);
+}
+
+/* ================================
+   ORDER CARD
+===================================*/
+.order-card {
+    border-radius: var(--radius);
+    background: #ffffff;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+.order-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+.order-header {
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+}
+.order-body {
+    padding: 1.5rem;
+}
+.order-body h6 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-dark);
+}
+body.dark-mode .order-body h6 {
+    color: var(--text-light);
+}
+
+/* ================================
+   TABLE (Desktop)
+===================================*/
+.table th {
+    background: var(--gray-100);
+    font-weight: 600;
+}
+.table td, .table th {
+    vertical-align: middle;
+}
+.order-total {
+    text-align: right;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* ================================
+   STATUS BADGES
+===================================*/
+.status-badge {
+    font-size: .9rem;
+    padding: .5rem 1rem;
+    border-radius: 30px;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+}
+.status-pending { background: #fff3cd; color: #856404; }
+.status-completed { background: #d4edda; color: #155724; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+.status-inprogress { background: #cfe2ff; color: #084298; }
+
+/* ================================
+   MOBILE RESPONSIVE TABLE
+===================================*/
+@media (max-width: 768px) {
+    .order-body {
+        padding: 1rem;
+    }
+    table {
+        border: 0;
+    }
+    table thead {
+        display: none;
+    }
+    table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid var(--gray-300);
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: var(--shadow-sm);
+    }
+    body.dark-mode table tbody tr {
+        background: #2f3338;
+        border-color: #444;
+    }
+    table tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: .75rem 1rem;
+        border: none;
+        border-bottom: 1px solid var(--gray-200);
+        font-size: .95rem;
+    }
+    body.dark-mode table tbody td {
+        border-bottom: 1px solid #444;
+    }
+    table tbody td:last-child {
+        border-bottom: none;
+    }
+    table tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--gray-800);
+    }
+    body.dark-mode table tbody td::before {
+        color: #ccc;
+    }
+    .order-total {
+        font-size: .95rem;
+        margin-top: .5rem;
+    }
+    .status-badge {
+        width: 100%;
+        display: block;
+        text-align: center;
+        margin-top: 1rem;
+    }
+}
+
+/* ================================
+   EMPTY STATE
+===================================*/
+.empty-history {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--gray-600);
+}
+.empty-history h4 {
+    font-weight: 600;
+    margin-bottom: .5rem;
+}
+.empty-history p {
+    margin-bottom: 1.5rem;
+}
+
+/* ================================
+   ANIMATIONS
+===================================*/
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp .6s ease forwards;
+}
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5 fade-in">
+    <h2 class="history-title">Historique des commandes</h2>
+
+    {% if orders %}
+        {% for order in orders %}
+        <div class="order-card">
+            <!-- En-tête commande -->
+            <div class="order-header">
+                <span>Commande #{{ order.id }}</span>
+                <small>{{ order.created_at|date:"d/m/Y H:i" }}</small>
+            </div>
+
+            <!-- Produits -->
+            <div class="order-body">
+                <h6>Produits commandés</h6>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Image</th>
+                                <th>Prix Unitaire</th>
+                                <th>Quantité</th>
+                                <th>Sous-total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td data-label="Produit">{{ item.product.name }}</td>
+                                <td data-label="Image" style="width:80px;">
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded" style="max-height:60px;">
+                                </td>
+                                <td data-label="Prix">{{ item.price|floatformat:2 }} DA</td>
+                                <td data-label="Quantité">{{ item.quantity }}</td>
+                                <td data-label="Sous-total">{{ item.get_subtotal|floatformat:2 }} DA</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="order-total">Total :</td>
+                                <td><strong>{{ order.get_total_price|floatformat:2 }} DA</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                    {% if order.status == "En attente" %}
+                        <span class="status-badge status-pending">En attente</span>
+                    {% elif order.status == "Terminée" %}
+                        <span class="status-badge status-completed">Terminée</span>
+                    {% elif order.status == "Annulée" %}
+                        <span class="status-badge status-cancelled">Annulée</span>
+                    {% elif order.status == "En cours" %}
+                        <span class="status-badge status-inprogress">En cours</span>
+                    {% else %}
+                        <span class="status-badge bg-secondary text-white">{{ order.status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-history">
+            <h4>Aucune commande trouvée</h4>
+            <p>Vous n’avez pas encore passé de commande. Parcourez nos produits et lancez-vous.</p>
+            <a href="{% url 'products_app:home' %}" class="btn btn-primary mt-3">Voir les produits</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

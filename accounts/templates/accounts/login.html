@@ -1,0 +1,46 @@
+{% extends "accounts/base.html" %}
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%; border-radius: 15px;">
+        <h3 class="text-center mb-4">Connexion</h3>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            <!-- Champ Username -->
+            <div class="form-group mb-3">
+                <label for="username">Nom d’utilisateur</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Entrez votre nom d’utilisateur" required>
+            </div>
+
+            <!-- Champ Password -->
+            <div class="form-group mb-3">
+                <label for="password">Mot de passe</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Entrez votre mot de passe" required>
+            </div>
+
+            <!-- Bouton -->
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+            </div>
+        </form>
+
+        <!-- Lien créer un compte -->
+        <p class="text-center mt-3 text-muted">
+            Pas encore de compte ?
+            <a href="{% url 'accounts:register' %}">Créer un compte</a>
+        </p>
+
+        <!-- Lien mot de passe oublié -->
+        <p class="text-center">
+            <a href="{% url 'accounts:password_reset' %}">Mot de passe oublié ?</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

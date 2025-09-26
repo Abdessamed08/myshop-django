@@ -1,0 +1,309 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}{{ product.name }} — Abdessamed Store{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ================= Base et Structure ================= */
+.product-detail {
+    padding: 30px 0 80px; /* Bas plus grand pour la barre d'action mobile */
+}
+
+@media (max-width: 768px) {
+    .product-detail {
+        padding-top: 20px;
+        padding-bottom: 90px;
+    }
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.fade-in.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.product-info h1 {
+    font-size: 1.7rem;
+    font-weight: 600;
+}
+.product-info .price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2a9d43;
+    margin: 10px 0;
+}
+.product-info .product-desc {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+/* ================= Carrousel des images ================= */
+.product-slider {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8f9fa;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.product-slider img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity .5s ease, transform .5s ease;
+    will-change: opacity, transform;
+}
+.product-slider img.active {
+    opacity: 1;
+    z-index: 1;
+}
+
+.slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.4);
+    border: none;
+    color: #fff;
+    font-size: 1.6rem;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index: 10;
+    transition: background .25s;
+    user-select: none;
+    opacity: 0.8;
+}
+.slider-arrow:hover {
+    background: rgba(0,0,0,0.7);
+    opacity: 1;
+}
+.slider-arrow.left {
+    left: 10px;
+}
+.slider-arrow.right {
+    right: 10px;
+}
+
+/* ================= Miniatures (thumbnails) ================= */
+.thumbs-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 10px 2px;
+    margin-top: 8px;
+    scroll-snap-type: x mandatory;
+    justify-content: center; /* Centrer sur desktop */
+}
+.thumbs-container::-webkit-scrollbar {
+    display: none;
+}
+.thumb-btn {
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .2s, transform .2s;
+}
+.thumb-btn img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    display: block;
+}
+.thumb-btn.active {
+    border-color: #ff416c;
+    transform: scale(1.05);
+}
+
+/* ================= Barre d'action mobile ================= */
+.sticky-cta {
+    display: none;
+}
+@media (max-width: 768px) {
+    .product-slider {
+        height: 300px;
+        border-radius: 0;
+        box-shadow: none;
+    }
+    .slider-arrow {
+        font-size: 1.2rem;
+        padding: 6px 10px;
+    }
+    .thumbs-container {
+        justify-content: flex-start; /* Réinitialiser le centrage sur mobile */
+    }
+    .thumb-btn img {
+        width: 55px;
+        height: 55px;
+    }
+    .product-info h1 {
+        font-size: 1.5rem;
+    }
+    .product-info .price {
+        font-size: 1.3rem;
+    }
+    .sticky-cta {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        padding: 12px;
+        gap: 10px;
+        border-top: 1px solid #ddd;
+        z-index: 100;
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px); /* Effet verre flou */
+        background: rgba(255, 255, 255, 0.9);
+    }
+    .sticky-cta .btn {
+        flex: 1;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="product-detail container">
+    <div class="row gy-4">
+        <!-- Section Images et Thumbnails -->
+        <div class="col-lg-6 fade-in">
+            <div class="product-slider" data-slider>
+                {% for img in product.images.all %}
+                <img src="{{ img.image.url }}" 
+                    class="{% if forloop.first %}active{% endif %}" 
+                    alt="Vue du produit {{ product.name }} numéro {{ forloop.counter }}">
+                {% endfor %}
+                <button class="slider-arrow left" aria-label="Image précédente" data-prev>&#10094;</button>
+                <button class="slider-arrow right" aria-label="Image suivante" data-next>&#10095;</button>
+            </div>
+            <div class="thumbs-container" data-thumbs>
+                {% for img in product.images.all %}
+                <button class="thumb-btn {% if forloop.first %}active{% endif %}" 
+                    aria-label="Voir l'image {{ forloop.counter }}" 
+                    data-index="{{ forloop.counter0 }}">
+                    <img src="{{ img.image.url }}" alt="Miniature du produit {{ product.name }}">
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Section d'informations sur le produit -->
+        <div class="col-lg-6 product-info fade-in">
+            <h1>{{ product.name }}</h1>
+            <div class="price">{{ product.price }} DA</div>
+            <div class="product-desc">
+                {% if product.description %}
+                    {{ product.description|linebreaks }}
+                {% else %}
+                    <span class="text-muted">Pas de description disponible.</span>
+                {% endif %}
+            </div>
+
+            <div class="d-flex gap-3 flex-wrap d-none d-md-flex">
+                <a href="{% url 'products_app:add_to_cart' product.id %}" 
+                    class="btn btn-success px-4">
+                    <i class="bi bi-cart-plus-fill me-1"></i> Panier
+                </a>
+                <a href="{% url 'products_app:buy_now' product.id %}" 
+                    class="btn btn-primary text-white px-4">
+                    <i class="bi bi-bag-fill me-1"></i> Acheter
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Barre d'action collante pour mobile -->
+<div class="sticky-cta shadow-lg d-flex d-md-none">
+    <a href="{% url 'products_app:add_to_cart' product.id %}" class="btn btn-success">
+        <i class="bi bi-cart-plus-fill me-1"></i> Panier
+    </a>
+    <a href="{% url 'products_app:buy_now' product.id %}" class="btn btn-primary text-white">
+        <i class="bi bi-bag-fill me-1"></i> Acheter
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Sélectionner les éléments en utilisant des attributs de données pour plus de robustesse
+    const sliderContainer = document.querySelector('[data-slider]');
+    if (!sliderContainer) {
+        console.error("Le conteneur du slider n'a pas été trouvé. Le script ne peut pas s'exécuter.");
+        return;
+    }
+    const slides = sliderContainer.querySelectorAll('img');
+    const thumbs = document.querySelectorAll('.thumb-btn');
+    let current = 0;
+
+    // Fonction pour afficher l'image à un index donné
+    function show(index) {
+        slides.forEach((s, i) => s.classList.toggle('active', i === index));
+        thumbs.forEach((t, i) => t.classList.toggle('active', i === index));
+        current = index;
+    }
+
+    // Gérer les clics sur les boutons de navigation
+    sliderContainer.querySelector('[data-prev]').addEventListener('click', () => {
+        show((current - 1 + slides.length) % slides.length);
+    });
+    sliderContainer.querySelector('[data-next]').addEventListener('click', () => {
+        show((current + 1) % slides.length);
+    });
+
+    // Gérer les clics sur les miniatures
+    thumbs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            show(parseInt(btn.dataset.index, 10));
+        });
+    });
+
+    // Gérer le glissement tactile pour le slider
+    let startX = 0;
+    sliderContainer.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+    }, { passive: true });
+    sliderContainer.addEventListener('touchend', e => {
+        const endX = e.changedTouches[0].clientX;
+        if (startX - endX > 50) { // Glissement vers la gauche
+            show((current + 1) % slides.length);
+        } else if (endX - startX > 50) { // Glissement vers la droite
+            show((current - 1 + slides.length) % slides.length);
+        }
+    });
+
+    // Animer le contenu
+    const fadeInElements = document.querySelectorAll('.fade-in');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    fadeInElements.forEach(element => {
+        observer.observe(element);
+    });
+});
+</script>
+{% endblock %}
