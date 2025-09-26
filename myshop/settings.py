@@ -1,5 +1,10 @@
+# Fichier myshop/settings.py - Version complète et finale
+
 import os
 from pathlib import Path
+from decouple import config
+from django.urls import reverse_lazy
+from django.contrib.messages import constants as messages
 
 # --------------------------
 # Chemins de base
@@ -7,9 +12,9 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --------------------------
-# Clé secrète (à remplacer par ta vraie clé)
+# Clé secrète (ne la changez pas)
 # --------------------------
-SECRET_KEY = 'django-insecure-your-secret-key'
+SECRET_KEY = 'django-insecure-your-secret-key' # Laissez cette ligne telle quelle
 
 # --------------------------
 # Mode debug
@@ -20,16 +25,11 @@ DEBUG = True
 # Hôtes autorisés
 # --------------------------
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".ngrok-free.app"]
-
 CSRF_TRUSTED_ORIGINS = ["https://*.ngrok-free.app"]
-
-
 
 # --------------------------
 # Applications installées
 # --------------------------
-# myshop/settings.py
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'products_app',
-    'accounts.apps.AccountsConfig', # 🚨 Correction ici 🚨
+    'accounts.apps.AccountsConfig',
     'widget_tweaks',
     'django_extensions',
 ]
@@ -67,7 +67,7 @@ ROOT_URLCONF = 'myshop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],  # ton dossier templates
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -86,7 +86,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myshop.wsgi.application'
 
 # --------------------------
-# Base de données (SQLite)
+# Base de données (Djongo/MongoDB) - Connexion Atlas RESTAURÉE
+# --------------------------
+# NOTE: Cette connexion doit maintenant utiliser l'IP statique enregistrée dans le fichier hosts.
+# --------------------------
+# Base de données (SQLite LOCAL) - Pour contourner le blocage du port mobile
 # --------------------------
 DATABASES = {
     'default': {
@@ -94,7 +98,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 # --------------------------
 # Validation des mots de passe
 # --------------------------
@@ -123,39 +126,24 @@ USE_L10N = True
 USE_TZ = True
 
 # --------------------------
-# Static files (CSS, JS)
+# Fichiers statiques (CSS, JS) et médias
 # --------------------------
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-# --------------------------
-# Médias (images, fichiers uploadés)
-# --------------------------
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # --------------------------
-# URL par défaut après login (optionnel)
+# Redirections d'authentification
 # --------------------------
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
-
-# à ajouter à la fin
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-DEBUG = True
-
-# Redirections utiles
-from django.urls import reverse_lazy
-
 LOGIN_URL = reverse_lazy('accounts:login')
 LOGIN_REDIRECT_URL = reverse_lazy('products_app:home')
 LOGOUT_REDIRECT_URL = reverse_lazy('products_app:home')
 
-
-
-# Classes de message compatibles Bootstrap
-from django.contrib.messages import constants as messages
+# --------------------------
+# Messages Django (compatibles Bootstrap)
+# --------------------------
 MESSAGE_TAGS = {
     messages.DEBUG: 'secondary',
     messages.INFO: 'info',
@@ -164,4 +152,7 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
+# --------------------------
+# Modèle d'utilisateur personnalisé
+# --------------------------
 AUTH_USER_MODEL = 'accounts.User'
