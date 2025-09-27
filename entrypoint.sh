@@ -15,4 +15,4 @@ python manage.py migrate --noinput
 # 3. Lancer le serveur Gunicorn
 echo "-> Lancement du serveur Gunicorn..."
 # La commande Gunicorn doit être la dernière
-exec gunicorn --preload myshop.wsgi:application
+exec gunicorn myshop.wsgi:application
