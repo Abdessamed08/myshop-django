@@ -63,7 +63,6 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # CORRECTION CRITIQUE: Ajout du 'r' manquant ici :
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -107,7 +106,6 @@ DATABASES = {
         'ENGINE': 'djongo',
         'NAME': 'store',
         'CLIENT': {
-            # NOTE : Utiliser une variable d'environnement pour la chaîne de connexion (config('MONGO_URI')) est plus sécurisé
             'host': 'mongodb://mezianimohamedabdelsamed_db_user:samedsamed13@cluster0.7k6tbxv.mongodb.net/store?retryWrites=true&w=majority',
         }
     }
@@ -143,7 +141,7 @@ USE_TZ = True
 # Fichiers statiques (CSS, JS) et médias
 # --------------------------
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # NOUVEAU: Ajouté pour la collecte des statiques en production
+# STATIC_ROOT N'EST PLUS NÉCESSAIRE ET CAUSE DES CRASHS - Ligne retirée pour résoudre le 500
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = '/media/'
