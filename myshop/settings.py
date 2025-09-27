@@ -1,8 +1,9 @@
-# Fichier myshop/settings.py - Version complète et finale
+# Fichier myshop/settings.py - Version complète et finale pour Déploiement
 
 import os
 from pathlib import Path
-from decouple import config
+# Les imports config et os sont NECESSAIRES pour lire les variables d'environnement de Render
+from decouple import config 
 from django.urls import reverse_lazy
 from django.contrib.messages import constants as messages
 
@@ -12,20 +13,32 @@ from django.contrib.messages import constants as messages
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --------------------------
-# Clé secrète (ne la changez pas)
+# Clé secrète (Utilise la variable d'environnement de Render)
 # --------------------------
-SECRET_KEY = 'django-insecure-your-secret-key' # Laissez cette ligne telle quelle
+# CRITIQUE: En production, SECRET_KEY DOIT être lue depuis l'environnement
+# Si elle n'est pas trouvée, elle utilise une valeur par défaut.
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key') 
 
 # --------------------------
-# Mode debug
+# Mode debug (Désactivé en production pour des raisons de sécurité)
 # --------------------------
-DEBUG = True
+# CRITIQUE: Désactive le mode DEBUG si SECRET_KEY est définie (donc si nous sommes sur Render)
+# La variable de mode DEBUG n'est pas utilisée ici, car nous voulons qu'elle soit FALSE en prod.
+DEBUG = (SECRET_KEY == 'django-insecure-your-secret-key') 
 
 # --------------------------
-# Hôtes autorisés
+# Hôtes autorisés (Lit la variable de Render et inclut l'URL de secours)
 # --------------------------
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".ngrok-free.app"]
-CSRF_TRUSTED_ORIGINS = ["https://*.ngrok-free.app"]
+RENDER_DOMAIN = 'myshop-django-1.onrender.com'
+RENDER_HOSTS = [RENDER_DOMAIN]
+
+# La ligne ci-dessous utilise la liste d'hôtes définie sur Render,
+# ET ajoute l'URL de secours (votre domaine Render) si elle manque.
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost').split(',') + RENDER_HOSTS
+
+# Nous ne gérons pas les fichiers statiques de manière avancée sur Render, donc CSRF_TRUSTED_ORIGINS n'est pas toujours nécessaire
+CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com"]
+
 
 # --------------------------
 # Applications installées
@@ -50,7 +63,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -86,7 +99,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'myshop.wsgi.application'
 
 # --------------------------
-# --------------------------
 # Base de données (Djongo/MongoDB) - Connexion Atlas RESTAURÉE
 # --------------------------
 DATABASES = {
@@ -94,6 +106,7 @@ DATABASES = {
         'ENGINE': 'djongo',
         'NAME': 'store',
         'CLIENT': {
+            # NOTE : Utiliser une variable d'environnement pour la chaîne de connexion (config('MONGO_URI')) est plus sécurisé
             'host': 'mongodb://mezianimohamedabdelsamed_db_user:samedsamed13@cluster0.7k6tbxv.mongodb.net/store?retryWrites=true&w=majority',
         }
     }
@@ -129,6 +142,7 @@ USE_TZ = True
 # Fichiers statiques (CSS, JS) et médias
 # --------------------------
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # NOUVEAU: Ajouté pour la collecte des statiques en production
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = '/media/'
