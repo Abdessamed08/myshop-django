@@ -105,8 +105,9 @@ DATABASES = {
         'ENGINE': 'djongo',
         'NAME': 'store',
         'CLIENT': {
-            # NOTE : Utiliser une variable d'environnement pour la chaîne de connexion (config('MONGO_URI')) est plus sécurisé
-            'host': 'mongodb://mezianimohamedabdelsamed_db_user:samedsamed13@cluster0.7k6tbxv.mongodb.net/store?retryWrites=true&w=majority',
+            # CORRECTION CRITIQUE: Changement de 'mongodb://' à 'mongodb+srv://'
+            # pour résoudre l'erreur DNS (No address associated with hostname) sur Render
+            'host': 'mongodb+srv://mezianimohamedabdelsamed_db_user:samedsamed13@cluster0.7k6tbxv.mongodb.net/store?retryWrites=true&w=majority',
         }
     }
 }
@@ -141,7 +142,7 @@ USE_TZ = True
 # Fichiers statiques (CSS, JS) et médias
 # --------------------------
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # CRITIQUE: Réintroduit pour que collectstatic fonctionne
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = '/media/'
